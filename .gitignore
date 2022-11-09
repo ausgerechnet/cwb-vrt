@@ -24,3 +24,6 @@ build/
 .Rproj.user
 .RData
 .Rhistory
+
+# virtual environment
+.venv
