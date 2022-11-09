@@ -1,0 +1,26 @@
+# compiler and cache
+*.so
+*.pyc
+__pycache__/
+.pytest_cache/
+
+# test data
+tests/data-dir/
+
+# coverage
+.coverage
+htmlcov/
+
+# dist and build
+dist/
+build/
+*.egg-info/
+
+# emacs backup
+*~
+
+# R
+.Rproj
+.Rproj.user
+.RData
+.Rhistory
