@@ -113,7 +113,7 @@ def dict2meta(d, index_key='id', level='text'):
     return line + ">\n"
 
 
-def _remove_whitespace(txt):
+def remove_whitespace(txt):
     """remove newlines, carriage returns, and tabulators
 
     """

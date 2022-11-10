@@ -1,9 +1,10 @@
 from datetime import datetime
+from functools import wraps
+from multiprocessing import Pool
 from time import time
 from timeit import default_timer
-from functools import wraps
+
 from tqdm import tqdm
-from multiprocessing import Pool
 
 
 def is_gz_file(filepath):

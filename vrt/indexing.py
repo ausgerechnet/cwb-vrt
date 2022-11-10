@@ -132,39 +132,37 @@ def parse_s_att(line):
     return typ, ann
 
 
-def main(args):
+def process_path(path_in, path_out, force, name, p_atts, cut_off, data_dir, registry_dir, lemmatisation):
     """"""
 
     # path_in
-    path_in = args.path_in
+    path_in = path_in
     dir_in = os.path.dirname(path_in)
-    f_name = args.path_in.split("/")[-1].split(".")[0].lower()
+    f_name = path_in.split("/")[-1].split(".")[0].lower()
 
     # path_out
-    if args.path_out is None:
+    if path_out is None:
         path_out = os.path.join(dir_in, f_name + ".sh")
-        if os.path.exists(path_out) and not args.force:
+        if os.path.exists(path_out) and not force:
             raise FileExistsError("\n".join([
-                f'{path_out} exists',
+                f'"{path_out}" already exists',
                 "you can force to overwrite by using --force / -f",
                 "or by directly specifying the path using --path_out / -o"
             ]))
-    else:
-        path_out = args.path_out
 
     # corpus_name
-    corpus_name = f_name.upper() if args.name is None else args.name.upper()
+    corpus_name = f_name.upper() if name is None else name.upper()
 
     # data directory
-    data_dir = os.path.join(args.data_dir, corpus_name.lower())
+    data_dir = os.path.join(data_dir, corpus_name.lower())
 
     # attributes
-    atts = guess_attributes(path_in, args.cut_off)
-    p_atts = "-P " + " -P ".join(args.p_atts[: atts['nr_p_atts'] - 1]) if atts['nr_p_atts'] > 1 else ""
+    atts = guess_attributes(path_in, cut_off)
+    p_atts = "-P " + " -P ".join(p_atts[: atts['nr_p_atts'] - 1]) if atts['nr_p_atts'] > 1 else ""
     s_atts = "-S " + " -S ".join(atts['s_atts'])
 
     # create file contents
-    file_contents = create_file(path_in, corpus_name, args.registry_dir, data_dir, p_atts, s_atts, args.lemmatisation)
+    file_contents = create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, lemmatisation)
 
     # write
     with open(path_out, "wt") as f:
@@ -172,3 +170,11 @@ def main(args):
 
     # status
     print(f"output written to {path_out}")
+
+
+def main(args):
+    """"""
+
+    process_path(args.path_in, args.path_out, args.force, args.name,
+                 args.p_atts, args.cut_off, args.data_dir, args.registry_dir,
+                 args.lemmatisation)
