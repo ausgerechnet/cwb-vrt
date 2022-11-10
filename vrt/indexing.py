@@ -153,7 +153,7 @@ def main(args):
         path_out = args.path_out
 
     # corpus_name
-    corpus_name = f_name.upper() if args.corpus_name is None else args.corpus_name.upper()
+    corpus_name = f_name.upper() if args.name is None else args.name.upper()
 
     # data directory
     data_dir = os.path.join(args.data_dir, corpus_name.lower())
