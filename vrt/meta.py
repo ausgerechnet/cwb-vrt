@@ -11,6 +11,20 @@ from vrt.utils import Progress, is_gz_file
 from vrt.vrt import meta2dict, remove_whitespace
 
 
+def topic_checker(token_list, topic_list):
+    """"""
+    # TODO: include
+
+    out = list()
+    for k in topic_list:
+        if k in token_list:
+            out.append("1")
+        else:
+            out.append("0")
+
+    return(out)
+
+
 class Meta:
     """wrapper for creating dataframes from s-atts
 

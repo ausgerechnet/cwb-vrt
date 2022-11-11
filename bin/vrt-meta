@@ -20,9 +20,12 @@ if __name__ == "__main__":
     parser.add_argument("--path_out", "-o", help="path to .tsv.gz", default=None, type=str)
     parser.add_argument("--force", "-f", dest="force", default=False, action='store_true', help="overwrite existing output file?")
     parser.add_argument("--level", "-s", help="s-att that contains meta data [text]", default="text", type=str)
-    parser.add_argument("--tokens", "-t", help="count tokens? [False]", action='store_true', default=False)
-    parser.add_argument("--extra", "-e", help="s-attributes with extra info (above level)", type=str, nargs='+', default=[])
     parser.add_argument("--idx_key", "-i", help="key of level that contains IDs", default="id", type=str)
+    parser.add_argument("--extra", "-e", help="s-attributes with extra info (above level)", type=str, nargs='+', default=[])
+    parser.add_argument("--tokens", "-t", help="count tokens? [False]", action='store_true', default=False)
+    # TODO: implement functionality
+    # parser.add_argument("--terms", "-s", help="path to terms to count (one per line)", type=str)
+    # parser.add_argument("--term_column", default=1, help="which column to user for counting [1]")
 
     if len(sys.argv) < 2:
         parser.print_help()
