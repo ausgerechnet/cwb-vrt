@@ -3,6 +3,7 @@
 
 import gzip
 import os
+import re
 import xml
 from collections import defaultdict
 
@@ -20,11 +21,11 @@ def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, le
         '',
         f'path_in="{path_in}"',
         f'corpus_name="{corpus_name}"',
+        f'registry_dir="{registry_dir}"',
         f'registry_file="{registry_file}"',
         f'data_dir="{data_dir}"',
-        f'registry_dir="{registry_dir}"',
         '',
-        'echo "create data directory"',
+        f'echo "data directory: {data_dir}"',
         'mkdir -p $data_dir',
         '',
         'echo "cwb-encode"',
@@ -39,8 +40,8 @@ def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, le
 
         # explicitly export p-att 'word' and 'lemma'
         p_atts = " ".join(["-P word", p_atts, "-P lemma"])
-        # do not export s-att 'corpus'
-        s_atts = s_atts.replace("-S corpus ", "")
+        # do not export s-att 'corpus' (because cwb-decode already exports a corpus attribute)
+        s_atts = re.sub(r"-S corpus\S+ ", "", s_atts)
 
         path_out = path_in.replace(".vrt.gz", "-lemma.vrt")
         if os.path.exists(path_out):
@@ -167,6 +168,9 @@ def process_path(path_in, path_out, force, name, p_atts, cut_off, data_dir, regi
     # write
     with open(path_out, "wt") as f:
         f.write(file_contents)
+
+    # make the script executable
+    os.system(f"chmod u+x {path_out}")
 
     # status
     print(f"output written to {path_out}")
