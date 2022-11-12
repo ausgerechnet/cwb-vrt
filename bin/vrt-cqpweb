@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+import argparse
+import logging
+import sys
+
+from vrt.cqpweb import main
+from vrt.version import __version__
+
+logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+# logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description="vrt-cqpweb: make VRT file CQPweb compatible")
+    parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__, help="Output version information and exit.")
+
+    parser.add_argument("path_in", type=str, help="path to original .vrt.gz")
+    parser.add_argument("--path_out", "-o", dest="path_out", default=None, type=str, help="where to save the result")
+    parser.add_argument("--force", "-f", dest="force", default=False, action='store_true', help="overwrite existing output file?")
+
+    if len(sys.argv) < 2:
+        parser.print_help()
+        sys.exit(1)
+
+    main(parser.parse_args())
