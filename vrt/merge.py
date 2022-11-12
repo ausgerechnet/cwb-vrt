@@ -13,6 +13,7 @@ def read_cohorts_info(paths_info, sep="\t"):
     """
     obligatory column in each dataframe: cohort_idx
     """
+
     print("gathering cohorts information")
     pb = Progress(length=len(paths_info), rate=1)
     dfs = list()
@@ -22,6 +23,7 @@ def read_cohorts_info(paths_info, sep="\t"):
 
     print("concatenating")
     df = concat(dfs)
+    df = df.fillna("")
 
     print("deduplicating")
     columns = list(df.columns.copy())
@@ -75,8 +77,8 @@ def main(args):
         # read cohorts info
         meta = read_cohorts_info(glob(args.cohorts_info))
         meta = meta.sort_values(by=args.order)
-        # sort cohorts
-        meta['id'] = meta['cohort_clear']
+        meta = meta.rename({'cohort_clear': 'id'}, axis=1)
+        # add paths
         meta['path'] = None
         for p in paths_in:
             cohort_idx = p.split("/")[-1].split(".vrt.gz")[0]
