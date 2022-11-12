@@ -3,7 +3,8 @@
 
 import gzip
 from glob import glob
-from pandas import concat, read_csv, NamedAgg
+
+from pandas import NamedAgg, concat, read_csv
 
 from vrt.utils import Progress
 from vrt.vrt import dict2meta
