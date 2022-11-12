@@ -104,7 +104,7 @@ def dict2meta(d, index_key='id', level='text'):
         line += f' id="{idx}"'
 
     for k in d.keys():
-        line += ' {k}="{d[k]}"'
+        line += f' {k}="{d[k]}"'
 
     # revert modification of original input
     if index_key is not None:
