@@ -2,13 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import gzip
-import os
 from glob import glob
 from xml.etree.ElementTree import ParseError
 
 from pandas import DataFrame
 
-from vrt.utils import Progress, is_gz_file
+from vrt.utils import Progress, is_gz_file, save_path_out
 from vrt.vrt import meta2dict, remove_whitespace
 
 
@@ -86,17 +85,7 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
     """"""
 
     # path_out
-    if path_out is None:
-        if path_in.endswith(".vrt.gz"):
-            path_out = path_in.replace(".vrt.gz", ".tsv.gz")
-        elif path_in.endswith(".xml.gz"):
-            path_out = path_in.replace(".xml.gz", ".tsv.gz")
-        if os.path.exists(path_out) and not force:
-            raise FileExistsError("\n".join([
-                f'"{path_out}" already exists',
-                "you can force to overwrite by using --force / -f",
-                "or by directly specifying the path using --path_out / -o"
-            ]))
+    f_name, path_out = save_path_out(path_in, path_out, suffix=".meta.gz", force=force)
 
     # init data containers
     meta = Meta()
@@ -152,11 +141,12 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
     # save
     meta.to_csv(path_out)
 
-    print(f"done. output writtein to {path_out}")
+    print(f"done. output written to {path_out}")
 
 
 def main(args):
     """"""
+
     paths_in = glob(args.glob_in)
 
     for p in paths_in:

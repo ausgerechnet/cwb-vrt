@@ -1,7 +1,7 @@
 from vrt.indexing import process_path
 
 
-def test_main():
+def test_process_path():
 
     process_path(
         "tests/data/tagesschau-mini.vrt.gz",

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 from datetime import datetime
 from functools import wraps
 from multiprocessing import Pool
@@ -8,6 +9,26 @@ from time import time
 from timeit import default_timer
 
 from tqdm import tqdm
+
+
+def save_path_out(path_in, path_out, suffix='.sh', force=False):
+
+    dir_in = os.path.dirname(path_in)
+    f_name = path_in.split("/")[-1].split(".")[0].lower()
+
+    if path_out is None:
+        path_out = os.path.join(dir_in, f_name + suffix)
+        if os.path.exists(path_out):
+            if force:
+                print(f'file "{path_out}" exists -- overwrite mode')
+            else:
+                raise FileExistsError("\n".join([
+                    f'file "{path_out}" already exists',
+                    "you can force overwrite by using --force",
+                    "or directly specify the path using --path_out"
+                ]))
+
+    return f_name, path_out
 
 
 def is_gz_file(filepath):
@@ -49,17 +70,19 @@ def time_it(func):
     return wrapper
 
 
-class Progress(object):
+class Progress:
     """
     Class for showing progress in for-loops
     (1) .init before loop
     (2) .update every loop
     (3) .finalize after loop
-    optional parameters for initialization:
-    - length of loop (will calculate approximate ETA)
-    - refresh rate (default: every 100 items)
     """
     def __init__(self, length=None, rate=100):
+        """
+        optional parameters for initialization:
+        - length of loop (will calculate approximate ETA)
+        - refresh rate (default: every 100 items)
+        """
         self.c = 0
         self.rate = rate
         when = time()
@@ -119,7 +142,7 @@ class Progress(object):
     def finalize(self):
         total_time = time() - self.start_glob
         msg = "done. processed %d items in %s" % (self.c, int2str(total_time))
-        trail = " ".join("" for _ in range(80-len(msg)))
+        trail = " ".join("" for _ in range(100-len(msg)))
         print(msg + trail)
 
 
@@ -137,7 +160,6 @@ def encow2unix(encow_time):
         encow_time,
         '%a, %d %b %Y %H:%M:%S GMT'
     )
-    # unix time = total seconds since 1970-01-01
     unix_time = int((dt - datetime(1970, 1, 1)).total_seconds())
     return unix_time
 
@@ -148,7 +170,6 @@ def twitter2unix(twitter_time):
         twitter_time,
         "%a %b %d %H:%M:%S +0000 %Y"
     )
-    # unix time = total seconds since 1970-01-01
     unix_time = int((dt - datetime(1970, 1, 1)).total_seconds())
     return unix_time
 

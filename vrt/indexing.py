@@ -7,7 +7,7 @@ import re
 import xml
 from collections import defaultdict
 
-from vrt.utils import Progress, is_gz_file
+from vrt.utils import Progress, is_gz_file, save_path_out
 from vrt.vrt import meta2dict
 
 
@@ -137,19 +137,7 @@ def process_path(path_in, path_out, force, name, p_atts, cut_off, data_dir, regi
     """"""
 
     # path_in
-    path_in = path_in
-    dir_in = os.path.dirname(path_in)
-    f_name = path_in.split("/")[-1].split(".")[0].lower()
-
-    # path_out
-    if path_out is None:
-        path_out = os.path.join(dir_in, f_name + ".sh")
-        if os.path.exists(path_out) and not force:
-            raise FileExistsError("\n".join([
-                f'"{path_out}" already exists',
-                "you can force to overwrite by using --force / -f",
-                "or by directly specifying the path using --path_out / -o"
-            ]))
+    f_name, path_out = save_path_out(path_in, path_out, suffix='.sh', force=force)
 
     # corpus_name
     corpus_name = f_name.upper() if name is None else name.upper()
@@ -179,6 +167,12 @@ def process_path(path_in, path_out, force, name, p_atts, cut_off, data_dir, regi
 def main(args):
     """"""
 
-    process_path(args.path_in, args.path_out, args.force, args.name,
-                 args.p_atts, args.cut_off, args.data_dir, args.registry_dir,
+    process_path(args.path_in,
+                 args.path_out,
+                 args.force,
+                 args.name,
+                 args.p_atts,
+                 args.cut_off,
+                 args.data_dir,
+                 args.registry_dir,
                  args.lemmatisation)
