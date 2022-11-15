@@ -14,7 +14,7 @@ def test_progress():
 
 def test_progress_length():
     print()
-    pb = Progress(rate=1, length=100000)
-    for _ in range(100000):
+    pb = Progress(rate=1, length=20000)
+    for _ in range(20000):
         sleep(.0001)
         pb.up()

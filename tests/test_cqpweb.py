@@ -5,5 +5,8 @@ def test_process_path():
     process_path(
         "tests/data/tagesschau-mini.vrt.gz",
         None,
-        True
+        True,
+        'article',
+        'fname',
+        ['year', 'month', 'rubrik']
     )

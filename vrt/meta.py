@@ -151,4 +151,10 @@ def main(args):
 
     for p in paths_in:
 
-        process_path(p, args.path_out, args.force, args.level, args.tokens, args.extra, args.idx_key)
+        process_path(p,
+                     args.path_out,
+                     args.force,
+                     args.level,
+                     args.tokens,
+                     args.extra,
+                     args.idx_key)

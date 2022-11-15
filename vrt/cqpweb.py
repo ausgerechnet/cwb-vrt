@@ -118,4 +118,9 @@ def process_path(path_in, path_out, force, level, id_key, categorical):
 def main(args):
     """"""
 
-    process_path(args.path_in, args.path_out, args.force, args.level, args.id_key, args.categorical)
+    process_path(args.path_in,
+                 args.path_out,
+                 args.force,
+                 args.level,
+                 args.id_key,
+                 args.categorical)

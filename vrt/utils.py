@@ -42,7 +42,7 @@ def save_path_out(path_in, path_out, suffix='.sh', force=False):
         path_out = os.path.join(dir_in, f_name + suffix)
         if os.path.exists(path_out):
             if force:
-                print(f'warning: file "{path_out}" exists -- forced overwrite mode')
+                print(f'warning: file "{path_out}" exists -- forced overwrite mode', file=sys.stderr)
             else:
                 raise FileExistsError("\n".join([
                     f'error: file "{path_out}" already exists',
@@ -199,30 +199,30 @@ def int2str(seconds):
         milli_seconds = 1000 * seconds
         if milli_seconds > 2:
             return f"{int(milli_seconds)} ms"
+
+        micro_seconds = 1000 * milli_seconds
+        if micro_seconds > 2:
+            return f"{int(micro_seconds)} µs"
+        elif micro_seconds > .1:
+            return f"{round(micro_seconds, 2)} µs"
+        elif micro_seconds > .01:
+            return f"{round(micro_seconds, 3)} µs"
+        elif micro_seconds > .001:
+            return f"{round(micro_seconds, 4)} µs"
         else:
-            micro_seconds = 1000 * milli_seconds
-            if micro_seconds > 2:
-                return f"{int(micro_seconds)} µs"
-            if micro_seconds > .1:
-                return f"{round(micro_seconds, 2)} µs"
-            elif micro_seconds > .01:
-                return f"{round(micro_seconds, 3)} µs"
-            elif micro_seconds > .001:
-                return f"{round(micro_seconds, 4)} µs"
-            else:
-                return "<1 ns"
+            return "<1 ns"
 
     # days and hours if more than a day
     nr_days = int(seconds // (60 * 60 * 24))
     nr_hours = int(seconds // (60 * 60) % 24)
     if nr_days > 0:
-        return "{:01} days, {:01} hours".format(nr_days, nr_hours)
+        return f"{nr_days} days, {nr_hours} hours"
 
     # hours and minutes if more than 12 hours
     nr_minutes = int(seconds // 60 % 60)
     if nr_hours > 12:
-        return "{:01} hours, {:01} minutes".format(nr_hours, nr_minutes)
+        return f"{nr_hours} hours, {nr_minutes} minutes"
 
-    # default: hours, minutes, seconds
+    # default: hours:minutes:seconds
     nr_seconds = int(seconds % 60)
     return "{:02}:{:02}:{:02}".format(nr_hours, nr_minutes, nr_seconds)

@@ -96,7 +96,7 @@ def guess_attributes(path_in, cut_off, rate=100000):
         if cut_off > 0 and pb.c >= cut_off:
             break
 
-    if cut_off <= 0 or pb.c < pb.d:
+    if cut_off <= 0 or pb.c < pb.length:
         pb.fine()
 
     f.close()
