@@ -1,11 +1,13 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from vrt.utils import save_path_out, is_gz_file, Progress
-from vrt.meta import meta2dict
-import xml
 import gzip
+import xml
+import xml.etree.ElementTree as ET
 from collections import defaultdict
+
+from vrt.utils import Progress, is_gz_file, save_id, save_path_out
+from vrt.vrt import dict2meta, force_categorical, meta2dict
 
 
 def parse_s_att(line):
@@ -22,8 +24,16 @@ def parse_s_att(line):
     return typ, ann
 
 
-def check_file(path, cut_off=-1):
+def read_xml(path):
+    """TODO"""
+    with gzip.open(path, "rt") as f:
+        root = ET.fromstring(f.read())
+        for child in root:
+            print(child.tag, child.attrib)
 
+
+def check_file(path, cut_off=-1):
+    """TODO"""
     # <text id="">, count
     values = defaultdict(set)
     nr_p_atts = 1
@@ -69,20 +79,43 @@ def check_file(path, cut_off=-1):
     # meta data types
 
 
-def modify_file(rename=dict(), ):
-    pass
-
-
-def process_path(path_in, path_out, force):
-
-    check_file(path_in)
+def process_path(path_in, path_out, force, level, id_key, categorical):
 
     f_name, path_out = save_path_out(path_in, path_out, suffix='-cqpweb.vrt.gz', force=force)
+    ids = set()
+    categorical_values = defaultdict(set)
+    with gzip.open(path_in, "rt") as f, gzip.open(path_out, "wt") as f_out:
+
+        text_count = 0
+
+        pb = Progress(rate=1)
+        for line in f:
+
+            if line.startswith(f"<{level}") or line.startswith(f"<{level}>"):
+                meta = meta2dict(line, level=level)
+                id_encountered = force_categorical(meta.pop(id_key))
+                id = save_id(id_encountered, ids)
+                meta['id'] = id
+                ids.add(id)
+                for c in categorical:
+                    key = force_categorical(c)
+                    value = force_categorical(meta.pop(c))
+                    meta[key] = value
+                    categorical_values[key].add(value)
+                line = dict2meta(meta)
+            elif line.startswith(f"</{level}>"):
+                line = "</text>" + "\n"
+                text_count += 1
+                pb.up()
+
+            f_out.write(line)
+        pb.fine()
+
+    for key, values in categorical_values.items():
+        print(f"- {key}: {len(values)} types")
 
 
 def main(args):
     """"""
 
-    process_path(args.path_in, args.path_out, args.force, args.name,
-                 args.p_atts, args.cut_off, args.data_dir, args.registry_dir,
-                 args.lemmatisation)
+    process_path(args.path_in, args.path_out, args.force, args.level, args.id_key, args.categorical)

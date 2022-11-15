@@ -38,7 +38,7 @@ def escape_xml_mysql(text):
     return text
 
 
-def escape_xml_categorical(text, fallback="NA"):
+def force_categorical(text, fallback="NA"):
     """converts strings to valid CQPweb categorical variables
 
     """
@@ -71,6 +71,9 @@ def escape_xml_categorical(text, fallback="NA"):
 
     # use fallback for empty strings
     handle = fallback if handle == "" else handle
+
+    if not re.search("^[A-Za-z]", handle):
+        handle = "c_" + handle
 
     return handle
 

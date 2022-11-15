@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 from datetime import datetime
 from functools import wraps
 from multiprocessing import Pool
@@ -9,6 +10,26 @@ from time import time
 from timeit import default_timer
 
 from tqdm import tqdm
+
+
+def update_id(id):
+    hit = re.search(r"(.*)__(\d+)$", str(id))
+    if hit:
+        prefix = hit.group(1)
+        nr = int(hit.group(2))
+        id_new = prefix + "__" + str(nr + 1)
+    else:
+        id_new = str(id) + '__1'
+    return id_new
+
+
+def save_id(id, ids):
+    id_old = id
+    while id in ids:
+        id = update_id(id)
+    if id_old != id:
+        print(f"\nduplicate id: {id_old} → {id}")
+    return id
 
 
 def save_path_out(path_in, path_out, suffix='.sh', force=False):
@@ -20,12 +41,11 @@ def save_path_out(path_in, path_out, suffix='.sh', force=False):
         path_out = os.path.join(dir_in, f_name + suffix)
         if os.path.exists(path_out):
             if force:
-                print(f'file "{path_out}" exists -- overwrite mode')
+                print(f'warning: file "{path_out}" exists -- forced overwrite mode')
             else:
                 raise FileExistsError("\n".join([
-                    f'file "{path_out}" already exists',
-                    "you can force overwrite by using --force",
-                    "or directly specify the path using --path_out"
+                    f'error: file "{path_out}" already exists',
+                    "you can force overwrite by using --force or by specifying a --path_out"
                 ]))
 
     return f_name, path_out
