@@ -97,21 +97,22 @@ class Progress:
     (2) .update every loop
     (3) .finalize after loop
     """
-    def __init__(self, length=None, rate=100):
+    def __init__(self, length=None, rate=1):
         """
         optional parameters for initialization:
         - length of loop (will calculate approximate ETA)
         - refresh rate (default: every 100 items)
         """
-        self.c = 0
-        self.rate = rate
         when = time()
-        self.start_glob = when
-        self.avg_glob = 0
-        self.start_rate = when
-        self.avg_rate = 0
-        self.d = length
-        self.eta = 0
+        self.start_glob = when  # start time of the progress bar
+        self.length = length    # total number of items
+
+        self.rate = rate        # number of seconds after which to refresh
+
+        self.c = 0              # number of items encountered
+
+        self.c_count = self.c   # start counter of this bundle
+        self.c_time = time()    # start time of this bundle
 
     # aliases
     def up(self):
@@ -122,41 +123,43 @@ class Progress:
 
     # methods
     def update(self):
+
         self.c += 1
+        when = time()
 
-        if self.c % self.rate == 0:
-            when = time()
-            self.avg_glob = (when-self.start_glob)/self.c
-            self.bundle_rate = (when-self.start_rate)
-            self.start_rate = when
+        current_time = when - self.c_time
+        current_size = self.c - self.c_count
 
-            if self.d is not None:
+        if current_time > self.rate:
+
+            avg_glob = (when-self.start_glob) / self.c
+
+            if self.length is not None:
                 # calculate ETA
-                self.eta = (self.d - self.c) * self.avg_glob
-                msg = "%d%% (%d/%d). average: %s (%s last %d items). ETA: %s" % (
-                    int(self.c/self.d*100),
-                    self.c,
-                    self.d,
-                    int2str(self.avg_glob),
-                    int2str(self.bundle_rate),
-                    self.rate,
-                    int2str(self.eta)
-                )
+                eta = (self.length - self.c) * avg_glob
+                msg = " ".join([
+                    f"{int(self.c/self.length*100)}% ({self.c}/{self.length}).",
+                    f"average: {int2str(avg_glob)}.",
+                    f"average last {current_size} item(s): {int2str(current_time/current_size)}.",
+                    f"ETA: {int2str(eta)}"
+                ])
 
             else:
-                msg = "%d. average per %s item(s): %s. average last %s item(s): %s." % (
-                    self.c,
-                    self.rate,
-                    int2str(self.avg_glob*100),
-                    self.rate,
-                    int2str(self.bundle_rate)
-                )
+                msg = " ".join([
+                    f"{self.c}.",
+                    f"average: {int2str(avg_glob)}.",
+                    f"average last {current_size} item(s): {int2str(current_time/current_size)}."
+                ])
 
             # print output
-            trail = " ".join("" for _ in range(80-len(msg)))
+            trail = " ".join("" for _ in range(100-len(msg)))
             print(msg + trail, end="\r")
 
-        if self.c == self.d:
+            # update
+            self.c_time = time()
+            self.c_count = self.c
+
+        if self.c == self.length:
             self.finalize()
 
     def finalize(self):
