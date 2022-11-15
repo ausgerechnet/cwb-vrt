@@ -3,6 +3,7 @@
 
 import os
 import re
+import sys
 from datetime import datetime
 from functools import wraps
 from multiprocessing import Pool
@@ -28,7 +29,7 @@ def save_id(id, ids):
     while id in ids:
         id = update_id(id)
     if id_old != id:
-        print(f"\nduplicate id: {id_old} → {id}")
+        print(f"\nduplicate id: {id_old} → {id}", file=sys.stderr)
     return id
 
 
@@ -91,57 +92,52 @@ def time_it(func):
 
 
 class Progress:
-    """
-    Class for showing progress in for-loops
-    (1) .init before loop
-    (2) .update every loop
-    (3) .finalize after loop
+    """Class for showing progress in for-loops
+    (1) pb = Progress() before loop
+    (2) pb.update()     every loop
+    (3) pb.finalize()   after loop
     """
     def __init__(self, length=None, rate=1):
         """
-        optional parameters for initialization:
-        - length of loop (will calculate approximate ETA)
-        - refresh rate (default: every 100 items)
+        :param int length: length of loop (will calculate approximate ETA)
+        :param int rate: refresh rate (default: every second)
         """
-        when = time()
-        self.start_glob = when  # start time of the progress bar
-        self.length = length    # total number of items
 
-        self.rate = rate        # number of seconds after which to refresh
+        self.start_glob = time()  # start time of the progress bar
+        self.length = length      # total number of items
+        self.rate = rate          # refresh rate
 
-        self.c = 0              # number of items encountered
+        self.c = 0                    # number of items already encountered
+        self.boundle_c = self.c       # start counter of this bundle
+        self.boundle_time = time()    # start time of this bundle
+        self.max_message = 0
 
-        self.c_count = self.c   # start counter of this bundle
-        self.c_time = time()    # start time of this bundle
-
-    # aliases
     def up(self):
+        """alias for self.update()"""
         self.update()
 
     def fine(self):
+        """alias for self.finalize()"""
         self.finalize()
 
-    # methods
     def update(self):
 
         self.c += 1
         when = time()
 
-        current_time = when - self.c_time
-        current_size = self.c - self.c_count
+        current_time = when - self.boundle_time
+        current_size = self.c - self.boundle_c
 
         if current_time > self.rate:
 
             avg_glob = (when-self.start_glob) / self.c
 
             if self.length is not None:
-                # calculate ETA
-                eta = (self.length - self.c) * avg_glob
                 msg = " ".join([
                     f"{int(self.c/self.length*100)}% ({self.c}/{self.length}).",
                     f"average: {int2str(avg_glob)}.",
                     f"average last {current_size} item(s): {int2str(current_time/current_size)}.",
-                    f"ETA: {int2str(eta)}"
+                    f"ETA: {int2str((self.length - self.c) * avg_glob)}"
                 ])
 
             else:
@@ -152,49 +148,30 @@ class Progress:
                 ])
 
             # print output
-            trail = " ".join("" for _ in range(100-len(msg)))
-            print(msg + trail, end="\r")
+            self.print_line(msg)
 
-            # update
-            self.c_time = time()
-            self.c_count = self.c
+            # update bundle start counter and start time
+            self.boundle_c = self.c
+            self.boundle_time = when
 
         if self.c == self.length:
             self.finalize()
 
+    def print_line(self, msg, end="\r", file=sys.stderr):
+        self.max_message = max(self.max_message, len(msg) + 1)
+        trail = " ".join("" for _ in range(self.max_message-len(msg)))
+        print(msg + trail, end=end, file=file)
+
     def finalize(self):
         total_time = time() - self.start_glob
         msg = "done. processed %d items in %s" % (self.c, int2str(total_time))
-        trail = " ".join("" for _ in range(100-len(msg)))
-        print(msg + trail)
+        self.print_line(msg, "\n")
 
 
-# time conversion
-def get_ymd():
-    """ gets the current date in yyyymmdd-format """
-    t = datetime.now()
-    d = str(t.year) + '{:02d}'.format(t.month) + '{:02d}'.format(t.day)
-    return d
-
-
-def encow2unix(encow_time):
-    # GMT = UTC
-    dt = datetime.strptime(
-        encow_time,
-        '%a, %d %b %Y %H:%M:%S GMT'
-    )
-    unix_time = int((dt - datetime(1970, 1, 1)).total_seconds())
-    return unix_time
-
-
-def twitter2unix(twitter_time):
-    # twitter time always has 0000 offset (=UTC)
-    dt = datetime.strptime(
-        twitter_time,
-        "%a %b %d %H:%M:%S +0000 %Y"
-    )
-    unix_time = int((dt - datetime(1970, 1, 1)).total_seconds())
-    return unix_time
+# time formatting
+def unix2ymd_hms(unix_time):
+    created_at = datetime.utcfromtimestamp(unix_time)
+    return created_at.strftime('%Y%m%d_%H%M%S')
 
 
 def unix2ymd(unix_time):
@@ -214,35 +191,38 @@ def unix2yw(unix_time):
     return str(year) + "_week" + str(week)
 
 
-def unix2ymd_hms(unix_time):
-    created_at = datetime.utcfromtimestamp(unix_time)
-    return created_at.strftime('%Y%m%d_%H%M%S')
-
-
-# time formatting
-def int2str(eta):
+def int2str(seconds):
     """ returns an appropriately formatted str of the seconds provided """
 
-    # miliseconds if less than 2 seconds
-    if eta < 2:
-        eta = 1000 * eta
-        if eta >= 1:
-            return "{:01} ms".format(int(eta))
+    # very small
+    if seconds < 2:
+        milli_seconds = 1000 * seconds
+        if milli_seconds > 2:
+            return f"{int(milli_seconds)} ms"
         else:
-            return "<1 ms"
-
-    nr_days = int(eta // (60 * 60 * 24))
-    nr_hours = int(eta // (60 * 60) % 24)
+            micro_seconds = 1000 * milli_seconds
+            if micro_seconds > 2:
+                return f"{int(micro_seconds)} µs"
+            if micro_seconds > .1:
+                return f"{round(micro_seconds, 2)} µs"
+            elif micro_seconds > .01:
+                return f"{round(micro_seconds, 3)} µs"
+            elif micro_seconds > .001:
+                return f"{round(micro_seconds, 4)} µs"
+            else:
+                return "<1 ns"
 
     # days and hours if more than a day
+    nr_days = int(seconds // (60 * 60 * 24))
+    nr_hours = int(seconds // (60 * 60) % 24)
     if nr_days > 0:
         return "{:01} days, {:01} hours".format(nr_days, nr_hours)
 
-    nr_minutes = int(eta // 60 % 60)
     # hours and minutes if more than 12 hours
+    nr_minutes = int(seconds // 60 % 60)
     if nr_hours > 12:
         return "{:01} hours, {:01} minutes".format(nr_hours, nr_minutes)
 
-    # fallback: hours, minutes, seconds
-    nr_seconds = int(eta % 60)
+    # default: hours, minutes, seconds
+    nr_seconds = int(seconds % 60)
     return "{:02}:{:02}:{:02}".format(nr_hours, nr_minutes, nr_seconds)
