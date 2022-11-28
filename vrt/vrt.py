@@ -127,3 +127,21 @@ def remove_whitespace(txt):
         txt = txt.replace("\t", " ")
 
     return txt
+
+
+def iter_s(f_in, level='text', yield_meta=True):
+    write = False
+    for line in f_in:
+        line = line.rstrip()
+        if line.startswith(f"<{level}>") or line.startswith(f"<{level} "):
+            meta = meta2dict(line, level)
+            text = list()
+            write = True
+        elif line.startswith(f"</{level}>"):
+            if yield_meta:
+                yield text, meta
+            else:
+                yield text
+            write = False
+        elif write:
+            text.append(line)

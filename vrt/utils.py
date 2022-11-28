@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import errno
+import gzip
 import os
 import re
 import sys
@@ -168,7 +170,6 @@ class Progress:
         self.print_line(msg, "\n")
 
 
-# time formatting
 def unix2ymd_hms(unix_time):
     created_at = datetime.utcfromtimestamp(unix_time)
     return created_at.strftime('%Y%m%d_%H%M%S')
@@ -226,3 +227,84 @@ def int2str(seconds):
     # default: hours:minutes:seconds
     nr_seconds = int(seconds % 60)
     return "{:02}:{:02}:{:02}".format(nr_hours, nr_minutes, nr_seconds)
+
+
+class MultiFileWriter:
+    """write to multiple files at a time without specifing paths in
+    advance.  takes care of appropriately opening and closing all file
+    connections, respecting the upper limit of connections.
+
+    do not forget to close files with mfw.close()
+    TODO: implement as context manager
+
+    """
+
+    def __init__(self, compression='gzip', init_mode='wt', create_dir=True, limit=512):
+        """
+
+        :param int limit: upper limit of simultaneous connections (on Ubuntu: check with "ulimit -n" = 1024)
+        """
+        self.limit = limit
+        self.init_mode = init_mode
+        self.create_dir = create_dir
+        self.compression = compression
+        self.paths = dict()     # [path]: dict(open?, count, connection)
+        self.nr_open = 0
+
+    def _open(self, path, mode, warning=True):
+
+        # close if no more space
+        # TODO: add heuristics for closing rarely used connections instead of all
+        if self.nr_open >= self.limit:
+            if warning:
+                print('\n' + 'too many open connections, closing all of them')
+            self.close()
+
+        # check if parent directories exist
+        if self.create_dir:
+            if not os.path.exists(os.path.dirname(path)):
+                try:
+                    os.makedirs(os.path.dirname(path))
+                except OSError as exc:  # guard against race condition
+                    if exc.errno != errno.EEXIST:
+                        raise
+
+        # open connection
+        if self.compression == 'gzip':
+            self.paths[path]['connection'] = gzip.open(path, mode=mode)
+        elif self.compression is None:
+            self.paths[path]['connection'] = open(path, mode=mode)
+        self.paths[path]['open'] = True
+
+        # increase count
+        self.nr_open += 1
+
+    def write(self, path, string):
+
+        if path not in self.paths.keys():
+
+            # init path
+            self.paths[path] = dict()
+            # open connection for first time
+            self._open(path, self.init_mode)
+            # start counting
+            self.paths[path]['count'] = 0
+
+        elif not self.paths[path]['open']:
+
+            # re-open connection (attach to file)
+            self._open(path, 'at')
+
+        # write
+        self.paths[path]['connection'].write(string)
+        # count use
+        self.paths[path]['count'] += 1
+
+    def close(self):
+
+        # close all paths
+        for path in self.paths.keys():
+            if 'connection' in self.paths[path].keys():
+                self.paths[path]['connection'].close()
+            self.paths[path]['open'] = False
+        self.nr_open = 0
