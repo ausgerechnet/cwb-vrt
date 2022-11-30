@@ -18,11 +18,12 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__, help="Output version information and exit.")
 
     parser.add_argument("path_in", type=str, help="path to original .vrt.gz")
-    parser.add_argument("--path_out", "-o", dest="path_out", default=None, type=str, help="where to save the result")
-    parser.add_argument("--force", "-f", dest="force", default=False, action='store_true', help="overwrite existing output file?")
-    parser.add_argument("--level", "-l", dest="level", default="text", type=str, help="the 'text' level [text]")
-    parser.add_argument("--id_key", "-i", dest="id_key", default="id", type=str, help="attribute-name of index [id]")
-    parser.add_argument("--categorical", "-c", dest="categorical", nargs="+", default=[], type=str, help="text attribute names to be converted to categorical CQPweb variables")
+    parser.add_argument("--path_out", "-o", default=None, type=str, help="where to save the result")
+    parser.add_argument("--force", "-f", default=False, action='store_true', help="overwrite existing output file? [False]")
+
+    parser.add_argument("--tag", "-t", default="text", type=str, help="the <text> tag ['text']")
+    parser.add_argument("--key", "-k", default="id", type=str, help="attribute name of index key ['id']")
+    parser.add_argument("--categorical", "-c", default=[], nargs="+", type=str, help="text attribute names to be converted to categorical CQPweb variables")
 
     if len(sys.argv) < 2:
         parser.print_help()

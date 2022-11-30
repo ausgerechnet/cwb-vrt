@@ -18,11 +18,11 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__, help="Output version information and exit.")
 
     parser.add_argument("glob_in", help="glob to paths to read from", type=str)
-    parser.add_argument("path_out", help="path to write to", type=str)
-    parser.add_argument("--cohorts_info", help="glob to cohorts-info", default=None, type=str)
-    parser.add_argument("--name", help="name of the corpus [derived from path_out]", default=None, type=str)
+
+    parser.add_argument("path_out", type=str, help="path to write to")
+    parser.add_argument("--cohorts_info", default=None, type=str, help="glob to cohorts-info")
+    parser.add_argument("--name", default=None, type=str, help="name of the corpus [derived from path_out]")
     parser.add_argument("--order", default=['yw', 'duplicated', 'retweet_status'])
-    args = parser.parse_args()
 
     if len(sys.argv) < 3:
         parser.print_help()

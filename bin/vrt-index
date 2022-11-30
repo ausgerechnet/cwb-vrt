@@ -16,15 +16,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="vrt-index: create CWB import script from vrt file")
     parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__, help="Output version information and exit.")
 
-    parser.add_argument("path_in", type=str, help="path to .vrt.gz to index")
-    parser.add_argument("--path_out", "-o", dest="path_out", default=None, type=str, help="where to save the bash script")
-    parser.add_argument("--force", "-f", dest="force", default=False, action='store_true', help="overwrite existing output file?")
-    parser.add_argument("--name", "-n", dest="name", default=None, help="corpus name")
-    parser.add_argument("--p_atts", "-p", dest="p_atts", nargs="+", type=str, default=['pos', 'lemma'], help="what p-attributes to index")
-    parser.add_argument("--cut_off", "-c", dest="cut_off", type=int, default=1000000, help="how many lines to look at")
-    parser.add_argument("--data_dir", "-d", type=str, default="/usr/local/share/cwb/data/")
-    parser.add_argument("--registry_dir", "-r", type=str, default="/usr/local/share/cwb/registry/")
-    parser.add_argument("--lemmatisation", "-l", action="store_true", default=False, help="apply cwb-lemmatize-smor and export? [False]")
+    parser.add_argument("path_in", type=str, help="path to original .vrt.gz")
+    parser.add_argument("--path_out", "-o", default=None, type=str, help="where to save the result [derived from (each) path_in]")
+    parser.add_argument("--force", "-f", default=False, action='store_true', help="overwrite existing output file? [False]")
+
+    parser.add_argument("--name", "-n", default=None, help="corpus name [derived from path_in]")
+    parser.add_argument("--p_atts", "-p", default=['pos', 'lemma'], nargs="+", type=str, help="what p-attributes to index ['pos', 'lemma']")
+    parser.add_argument("--cut_off", "-c", default=1000000, type=int, help="how many lines to look at [1000000]")
+    parser.add_argument("--lemmatisation", "-l", default=False, action="store_true", help="apply cwb-lemmatize-smor and export? [False]")
+    parser.add_argument("--data_dir", "-d", default="/usr/local/share/cwb/data/", type=str)
+    parser.add_argument("--registry_dir", "-r", default="/usr/local/share/cwb/registry/", type=str)
 
     if len(sys.argv) < 2:
         parser.print_help()

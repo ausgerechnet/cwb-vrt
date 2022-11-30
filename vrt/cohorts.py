@@ -57,7 +57,7 @@ def main(args):
     process_path(args.path_in,
                  args.path_out,
                  args.force,
-                 args.text_old,
-                 args.text_new,
-                 args.cohort,
+                 args.tag_old,
+                 args.tag_new,
+                 args.tag_cohort,
                  args.categorical)

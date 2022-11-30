@@ -18,12 +18,13 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__, help="Output version information and exit.")
 
     parser.add_argument("path_in", type=str, help="path to original .vrt.gz")
-    parser.add_argument("--path_out", "-o", dest="path_out", default=None, type=str, help="where to save the result")
-    parser.add_argument("--force", "-f", dest="force", default=False, action='store_true', help="overwrite existing output file?")
-    parser.add_argument("--text_old", dest="text_old", default="text", type=str, help="the old 'text' level [text]")
-    parser.add_argument("--text_new", dest="text_new", default="subtext", type=str, help="the new 'text' level [subtext]")
-    parser.add_argument("--cohort", dest="cohort", default="text", type=str, help="the new 'text' level [text]")
-    parser.add_argument("--categorical", "-c", dest="categorical", nargs="+", default=[], type=str, help="text attribute names used for cohorting")
+    parser.add_argument("--path_out", "-o", default=None, type=str, help="where to save the result [derived from (each) path_in]")
+    parser.add_argument("--force", "-f", default=False, action='store_true', help="overwrite existing output file? [False]")
+
+    parser.add_argument("--tag-old", default="text", type=str, help="the old <text> tag ['text']")
+    parser.add_argument("--tag-new", default="subtext", type=str, help="the new <text> tag ['subtext']")
+    parser.add_argument("--tag-cohort", default="text", type=str, help="the new <cohorts> tag ['text']")
+    parser.add_argument("--categorical", "-c", default=[], nargs="+", type=str, help="text attribute names used for cohorting")
 
     if len(sys.argv) < 2:
         parser.print_help()

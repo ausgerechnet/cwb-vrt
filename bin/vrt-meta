@@ -14,19 +14,20 @@ logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="vrt-meta: create tsv table of meta data stored in s-atts")
+    parser = argparse.ArgumentParser(description="vrt-meta: create tsv table of meta data stored in structual attributes")
     parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__, help="Output version information and exit.")
 
-    parser.add_argument("glob_in", help="path(s) to .[xml|vrt].gz to get meta data from", type=str)
-    parser.add_argument("--path_out", "-o", help="path to .tsv.gz", default=None, type=str)
-    parser.add_argument("--force", "-f", dest="force", default=False, action='store_true', help="overwrite existing output file?")
-    parser.add_argument("--level", "-s", help="s-att that contains meta data [text]", default="text", type=str)
-    parser.add_argument("--idx_key", "-i", help="key of level that contains IDs", default="id", type=str)
-    parser.add_argument("--extra", "-e", help="s-attributes with extra info (above level)", type=str, nargs='+', default=[])
-    parser.add_argument("--tokens", "-t", help="count tokens? [False]", action='store_true', default=False)
+    parser.add_argument("glob_in", type=str, help="path(s) to .[xml|vrt].gz to get meta data from")
+    parser.add_argument("--path_out", "-o", default=None, type=str, help="where to save result [derived from path_in]")
+    parser.add_argument("--force", "-f", default=False, action='store_true', help="overwrite existing output file? [False]")
+
+    parser.add_argument("--tag", "-t", default="text", type=str, help="tag that contains meta data [text]")
+    parser.add_argument("--key", "-k", default="id", type=str, help="key of level that contains IDs [id]")
+    parser.add_argument("--extra", "-e", default=[], type=str, nargs='+', help="s-attributes with extra info (above level)")
+    parser.add_argument("--tokens", "-c", default=False, action='store_true', help="count tokens? [False]")
     # TODO: implement functionality
     # parser.add_argument("--terms", "-s", help="path to terms to count (one per line)", type=str)
-    # parser.add_argument("--term_column", default=1, help="which column to user for counting [1]")
+    # parser.add_argument("--term_column", default=1, help="which column to use for counting [1]")
 
     if len(sys.argv) < 2:
         parser.print_help()
