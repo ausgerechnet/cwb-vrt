@@ -132,7 +132,7 @@ def remove_whitespace(txt):
 def iter_s(f_in, level='text', yield_meta=True):
     write = False
     for line in f_in:
-        line = line.rstrip()
+        line = line.strip()
         if line.startswith(f"<{level}>") or line.startswith(f"<{level} "):
             meta = meta2dict(line, level)
             text = list()
