@@ -99,6 +99,7 @@ class Progress:
     (2) pb.update()     every loop
     (3) pb.finalize()   after loop
     """
+
     def __init__(self, length=None, rate=1):
         """
         :param int length: length of loop (will calculate approximate ETA)
@@ -146,7 +147,8 @@ class Progress:
                 msg = " ".join([
                     f"{self.c}.",
                     f"average: {int2str(avg_glob)}.",
-                    f"average last {current_size} item(s): {int2str(current_time/current_size)}."
+                    f"average last {current_size} item(s): {int2str(current_time/current_size)}.",
+                    f"total time: {int2str(when-self.start_glob)}"
                 ])
 
             # print output
