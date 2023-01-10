@@ -32,6 +32,7 @@ setup(
     scripts=[
         'bin/vrt-cohorts',
         'bin/vrt-cqpweb',
+        'bin/vrt-deduplicate',
         'bin/vrt-index',
         'bin/vrt-merge',
         'bin/vrt-meta',
