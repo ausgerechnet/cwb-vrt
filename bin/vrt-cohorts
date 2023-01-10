@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument("--tag-new", default="subtext", type=str, help="the new <text> tag ['subtext']")
     parser.add_argument("--tag-cohort", default="text", type=str, help="the new <cohorts> tag ['text']")
     parser.add_argument("--categorical", "-c", default=[], nargs="+", type=str, help="text attribute names used for cohorting")
+    parser.add_argument("--memory", "-m", default=False, action='store_true', help="sort in memory? [False]")
 
     if len(sys.argv) < 2:
         parser.print_help()
