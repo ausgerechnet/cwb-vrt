@@ -95,9 +95,9 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
         nr_tokens = list()
 
     # iterate over file
-    pb = Progress(rate=100)
     f_in = gzip.open(path_in, "rt") if is_gz_file(path_in) else open(path_in, "rt")
-
+    print("collecting meta data")
+    pb = Progress()
     for line in f_in:
 
         # count tokens
@@ -139,6 +139,7 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
         meta.variables['nr_tokens'] = nr_tokens
 
     # save
+    print("saving file")
     meta.to_csv(path_out)
 
     print(f"done. output written to {path_out}")
@@ -154,7 +155,7 @@ def main(args):
         process_path(p,
                      args.path_out,
                      args.force,
-                     args.level,
+                     args.tag,
                      args.tokens,
                      args.extra,
-                     args.idx_key)
+                     args.key)

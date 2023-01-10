@@ -121,6 +121,6 @@ def main(args):
     process_path(args.path_in,
                  args.path_out,
                  args.force,
-                 args.level,
-                 args.id_key,
+                 args.tag,
+                 args.key,
                  args.categorical)
