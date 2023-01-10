@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import argparse
+import logging
+from hashlib import md5
+from glob import glob
+from pandas import DataFrame, NamedAgg
+
+logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+# logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+
+
+def get_regions(path_in, level="s"):
+
+    regions = list()
+    with open(path_in, "rt") as f:
+
+        region = list()
+        c = 0
+
+        for line in f:
+
+            if line.startswith(f"</{level}>"):
+                c += 1
+                regions.append({
+                    "id": path_in,
+                    "region": " ".join(region),
+                    "region_nr": c,
+                    "region_length": len(region),
+                    "region_hash": md5(" ".join(region).encode()).hexdigest()
+                })
+                region = list()
+
+            elif not line.startswith("<"):
+                region.append(line.strip())
+
+    return regions
+
+
+def deduplicate(records, keep='last'):
+
+    ndup = DataFrame.from_records(records).sort_values(by=['id', 'region_nr'])
+    ndup_unique = ndup.loc[~ndup.duplicated(subset=['region_hash'], keep=keep)][['id', 'region_hash']]
+    ndup = ndup.merge(ndup_unique, how='left', on='region_hash', suffixes=('', f'_{keep}'))
+    ndup = ndup.groupby('id').agg(
+        nr_regions=NamedAgg(column=f'id_{keep}', aggfunc='count'),
+        nr_tokens=NamedAgg(column='region_length', aggfunc='sum'),
+        cluster_id=NamedAgg(column='id_{keep}', aggfunc=lambda x: max(list(x), key=list(x).count))
+    )
+    ndup['dup'] = (ndup.index != ndup['cluster_id'])
+
+    return ndup
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("glob_in")
+    parser.add_argument("path_out")
+    args = parser.parse_args()
+
+    paths_in = glob(args.glob_in)
+
+    print("collecting")
+    region_records = list()
+    for p in paths_in:
+        print(p)
+        region_records.extend(get_regions(p))
+
+    print("deduplicating")
+    ndup = deduplicate(region_records)
+    ndup.to_csv(args.path_out, sep="\t", compression="gzip")
