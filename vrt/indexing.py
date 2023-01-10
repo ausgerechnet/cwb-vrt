@@ -25,7 +25,7 @@ def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, le
         f'registry_file="{registry_file}"',
         f'data_dir="{data_dir}"',
         '',
-        f'echo "data directory: {data_dir}"',
+        'echo "data directory: $data_dir"',
         'mkdir -p $data_dir',
         '',
         'echo "cwb-encode"',
