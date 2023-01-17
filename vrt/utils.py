@@ -35,21 +35,26 @@ def save_id(id, ids):
     return id
 
 
-def save_path_out(path_in, path_out, suffix='.sh', force=False):
+def save_path_out(path_in, path_out, suffix='.sh', force=False, dir_out=None):
 
     dir_in = os.path.dirname(path_in)
     f_name = path_in.split("/")[-1].split(".")[0].lower()
 
     if path_out is None:
-        path_out = os.path.join(dir_in, f_name + suffix)
-        if os.path.exists(path_out):
-            if force:
-                print(f'warning: file "{path_out}" exists -- forced overwrite mode', file=sys.stderr)
-            else:
-                raise FileExistsError("\n".join([
-                    f'error: file "{path_out}" already exists',
-                    "you can force overwrite by using --force or by specifying a --path_out"
-                ]))
+
+        if dir_out is None:
+            dir_out = dir_in
+
+        path_out = os.path.join(dir_out, f_name + suffix)
+
+    if os.path.exists(path_out):
+        if force:
+            print(f'warning: file "{path_out}" exists -- forced overwrite mode', file=sys.stderr)
+        else:
+            raise FileExistsError("\n".join([
+                f'error: file "{path_out}" already exists',
+                "you can force overwrite by using --force or by specifying a --path_out"
+            ]))
 
     return f_name, path_out
 
