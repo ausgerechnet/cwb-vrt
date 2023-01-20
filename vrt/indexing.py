@@ -28,7 +28,7 @@ def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, le
         'data_subdir="$data_dir${corpus_name,,}"',
         '',
         'echo "data directory: $data_subdir"',
-        'mkdir -p $data_dir',
+        'mkdir -p $data_subdir',
         '',
         'echo "cwb-encode (registry file: $registry_file)"',
         f'cwb-encode -d $data_subdir -f $path_in -R "$registry_file" -xsB -c utf8 {p_atts} {s_atts}',
