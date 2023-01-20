@@ -14,22 +14,24 @@ from vrt.vrt import meta2dict
 def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, lemmatisation=False):
     """"""
 
-    registry_file = os.path.join(registry_dir, corpus_name.lower())
-
     lines = [
         '#!/bin/bash',
         '',
         f'path_in="{path_in}"',
+        '',
         f'corpus_name="{corpus_name}"',
+        '',
         f'registry_dir="{registry_dir}"',
-        f'registry_file="{registry_file}"',
         f'data_dir="{data_dir}"',
         '',
-        'echo "data directory: $data_dir"',
+        'registry_file="$registry_dir${corpus_name,,}"',
+        'data_subdir="$data_dir${corpus_name,,}"',
+        '',
+        'echo "data directory: $data_subdir"',
         'mkdir -p $data_dir',
         '',
-        'echo "cwb-encode"',
-        f'cwb-encode -d $data_dir -f $path_in -R "$registry_file" -xsB -c utf8 {p_atts} {s_atts}',
+        'echo "cwb-encode (registry file: $registry_file)"',
+        f'cwb-encode -d $data_subdir -f $path_in -R "$registry_file" -xsB -c utf8 {p_atts} {s_atts}',
         '',
         'echo "cwb-make"',
         'cwb-make -r $registry_dir -M 4096 -V "$corpus_name"',
@@ -41,7 +43,7 @@ def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, le
         # explicitly export p-att 'word' and 'lemma'
         p_atts = " ".join(["-P word", p_atts, "-P lemma"])
         # do not export s-att 'corpus' (because cwb-decode already exports a corpus attribute)
-        s_atts = re.sub(r"-S corpus\S+ ", "", s_atts)
+        s_atts = re.sub(r"\s*-S corpus\S*\s*", " ", s_atts)
 
         path_out = path_in.replace(".vrt.gz", "-lemma.vrt")
         if os.path.exists(path_out):
@@ -63,10 +65,10 @@ def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, le
     return "\n".join(lines)
 
 
-def guess_attributes(path_in, cut_off, rate=100000):
+def guess_attributes(path_in, cut_off):
     """"""
 
-    print("guessing attributes ...")
+    print(f"guessing attributes from first {cut_off} lines...")
 
     s_atts = defaultdict(set)
     nr_p_atts = 1
@@ -74,7 +76,7 @@ def guess_attributes(path_in, cut_off, rate=100000):
     nr_s_lines = 0
 
     f = gzip.open(path_in, "rt") if is_gz_file(path_in) else open(path_in, "rt")
-    pb = Progress(length=cut_off, rate=rate) if cut_off > 0 else Progress(rate=rate)
+    pb = Progress(length=cut_off) if cut_off > 0 else Progress()
     for line in f:
 
         if line.startswith("<?"):
@@ -142,12 +144,18 @@ def process_path(path_in, path_out, force, name, p_atts, cut_off, data_dir, regi
     # corpus_name
     corpus_name = f_name.upper() if name is None else name.upper()
 
-    # data directory
-    data_dir = os.path.join(data_dir, corpus_name.lower())
-
     # attributes
     atts = guess_attributes(path_in, cut_off)
+
+    # post-process positional attributes
+    if atts['nr_p_atts'] > len(p_atts) + 1:
+        print(f"warning: saw more p-attributes ({atts['nr_p_atts'] - 1}) than provided p-attribute names (excluding primary layer)")
+        padding = atts['nr_p_atts'] - (len(p_atts) + 1)
+        p_atts = p_atts + [f"p_att_{c}" for c in range(padding)]
+
+    # convert to strings
     p_atts = "-P " + " -P ".join(p_atts[: atts['nr_p_atts'] - 1]) if atts['nr_p_atts'] > 1 else ""
+    print(f"p-attribute names: {p_atts}")
     s_atts = "-S " + " -S ".join(atts['s_atts'])
 
     # create file contents
