@@ -1,7 +1,7 @@
 # cwb-vrt #
 **cwb-vrt** is a Python 3 module and command line interface for processing VRT files.
 
-VRT is used as an import (and export) format of the [IMS Open Corpus Workbench (CWB)](http://cwb.sourceforge.net/).  VRT files are XML files containing verticalised text.  The CWB distinguishes **positional attributes** (p-atts) on a token-level, which are stored in tab-separated lines, and **structural attributes** (s-atts) stored in XML elements (i.e. matching pairs of start and end tags).
+VRT files are XML files containing verticalised text and are used as an import (and export) format of the [IMS Open Corpus Workbench (CWB)](http://cwb.sourceforge.net/).  The CWB distinguishes **positional attributes** (p-atts) on a token-level, which are stored in tab-separated lines, and **structural attributes** (s-atts) stored in XML elements (i.e. matching pairs of start and end tags).
 ```
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes" ?>
 <!-- A Thrilling Experience -->
@@ -27,11 +27,13 @@ tick	VB	tick
 </story>
 ...
 ```
-The VRT file above containes three s-atts (`story`, `p`, `s`) and three p-atts (by default, the first or *primary* layer is called `word` — the other p-atts here would be `pos` and `lemma`). The XML-element `story` has two attribute-value pairs:
+The VRT file above contains three p-atts: by default, the first or *primary* layer is called `word` — the other p-atts here would be `pos` and `lemma`. Note that the names of p-atts are usually not explicitly encoded in VRT files.
+
+There are also three s-atts (`story`, `p`, and `s`). The XML-element `story` has two attribute-value pairs:
 ```
 <story num="4" title="A Thrilling Experience">
 ```
-which is referred to as the **annotation** of the s-att. cwb-vrt usually refers to the name of the XML element (`story`) as "level" of the s-att.
+cwb-vrt usually refers to the name of the XML element (e.g. `story`) as "level" of the s-att. Note that in the CWB, each attribute-value pair will be stored as a separate s-att (here: `story_num` and `story_title`) with **annotation**.  `p` and `s` do not have any annotation.
 
 ## Installation ##
 
