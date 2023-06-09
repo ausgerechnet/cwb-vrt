@@ -9,21 +9,30 @@ from vrt.cqpweb import main
 from vrt.version import __version__
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
-# logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="vrt-cqpweb: make VRT file compatible with CQPweb")
-    parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__, help="Output version information and exit.")
+    parser = argparse.ArgumentParser(
+        description="vrt-cqpweb: make VRT file compatible with CQPweb",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__,
+                        help="output version information and exit")
 
-    parser.add_argument("path_in", type=str, help="path to original .vrt.gz")
-    parser.add_argument("--path_out", "-o", default=None, type=str, help="where to save the result")
-    parser.add_argument("--force", "-f", default=False, action='store_true', help="overwrite existing output file? [False]")
+    parser.add_argument("path_in", type=str,
+                        help="path to original .vrt.gz")
+    parser.add_argument("--path_out", "-o", default=None, type=str,
+                        help="where to save the result [derived from path_in]")
+    parser.add_argument("--force", "-f", default=False, action='store_true',
+                        help="overwrite existing output file?")
 
-    parser.add_argument("--tag", "-t", default="text", type=str, help="the <text> tag ['text']")
-    parser.add_argument("--key", "-k", default="id", type=str, help="attribute name of index key ['id']")
-    parser.add_argument("--categorical", "-c", default=[], nargs="+", type=str, help="text attribute names to be converted to categorical CQPweb variables")
+    parser.add_argument("--level", "-l", default="text", type=str,
+                        help="the 'text' tag (will be renamed to 'text')")
+    parser.add_argument("--index", "-i", default="id", type=str,
+                        help="attribute of level containing IDs")
+    parser.add_argument("--categorical", "-c", default=[], nargs="+", type=str,
+                        help="attributes of level to be converted to categorical CQPweb variables")
 
     if len(sys.argv) < 2:
         parser.print_help()

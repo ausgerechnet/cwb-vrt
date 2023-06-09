@@ -5,16 +5,16 @@ import argparse
 import logging
 import sys
 
-from vrt.deduplicate import main
+from vrt.cohorts import main
 from vrt.version import __version__
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-        description="vrt-deduplicate: get duplicate regions",
+        description="vrt-cohort: conflate texts according to meta data into cohorts",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__,
@@ -27,10 +27,17 @@ if __name__ == '__main__':
     parser.add_argument("--force", "-f", default=False, action='store_true',
                         help="overwrite existing output file?")
 
-    parser.add_argument("--level", type=str, default="text",
-                        help="level of regions to check for duplicates")
-    parser.add_argument("--keep", type=str, default="last",
-                        help="which one of these regions to keep")
+    parser.add_argument("--level-old", default="text", type=str,
+                        help="name of s-att used for partitioning in input")
+    parser.add_argument("--level-new", default="subtext", type=str,
+                        help="new name of --level-old in output")
+    parser.add_argument("--level-cohort", default="text", type=str,
+                        help="name of s-att used for partitioning in output")
+
+    parser.add_argument("--categorical", "-c", default=[], nargs="+", type=str,
+                        help="text attribute names used for cohorting")
+    parser.add_argument("--memory", "-m", default=False, action='store_true',
+                        help="sort in memory?")
 
     if len(sys.argv) < 2:
         parser.print_help()

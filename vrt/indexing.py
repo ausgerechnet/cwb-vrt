@@ -3,7 +3,6 @@
 
 import gzip
 import os
-import re
 import xml
 from collections import defaultdict
 
@@ -11,8 +10,13 @@ from vrt.utils import Progress, is_gz_file, save_path_out
 from vrt.vrt import meta2dict
 
 
-def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, lemmatisation=False):
-    """"""
+def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, lemmatisation=False, charset="utf8"):
+    """
+    create shell script for executing cwb-encode
+    with default options:
+    global: -xsBC -9
+    s-attributes: -S {s}:0 or -S {s}:0+..., <corpus> will be ignored
+    """
 
     lines = [
         '#!/bin/bash',
@@ -31,7 +35,7 @@ def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, le
         'mkdir -p $data_subdir',
         '',
         'echo "cwb-encode (registry file: $registry_file)"',
-        f'cwb-encode -d $data_subdir -f $path_in -R "$registry_file" -xsB -c utf8 {p_atts} {s_atts}',
+        f'cwb-encode -d $data_subdir -f $path_in -R "$registry_file" -xsBC -c {charset} -9 {p_atts} {s_atts}',
         '',
         'echo "cwb-make"',
         'cwb-make -r $registry_dir -M 4096 -V "$corpus_name"',
@@ -40,14 +44,10 @@ def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, le
 
     if lemmatisation:
 
-        # explicitly export p-att 'word' and 'lemma'
-        p_atts = " ".join(["-P word", p_atts, "-P lemma"])
-        # do not export s-att 'corpus' (because cwb-decode already exports a corpus attribute)
-        s_atts = re.sub(r"\s*-S corpus\S*\s*", " ", s_atts)
-
         path_out = path_in.replace(".vrt.gz", "-lemma.vrt")
-        if os.path.exists(path_out):
-            raise FileExistsError(f'path for lemmatised corpus exists: {path_out}')
+
+        # explicitly export p-att 'word' and 'lemma' alongside all other p-atts
+        p_atts = " ".join(["-P word", p_atts, "-P lemma"])
 
         lines += [
             'echo "lemmatisation"',
@@ -106,9 +106,14 @@ def guess_attributes(path_in, cut_off):
     # post-process s-attributes
     s_atts_new = list()
     for s in s_atts.keys():
-        if len(s_atts[s]) == 0:
-            s_atts_new.append(s)
-        else:
+
+        if s == 'corpus':       # ignore <corpus>
+            continue
+
+        if len(s_atts[s]) == 0:  # no annotation
+            new = s + ":0"
+            s_atts_new.append(new)
+        else:                    # annotation
             new = s + ":0+" + "+".join(sorted(list(s_atts[s])))
             s_atts_new.append(new)
 
@@ -123,10 +128,10 @@ def guess_attributes(path_in, cut_off):
 
 def parse_s_att(line):
     """"""
-    row = line.rstrip()
-    row = row.rstrip(">").lstrip("<")
-    row = row.split(" ")
-    typ = row[0]
+
+    row = line.strip().rstrip(">").lstrip("<")
+    typ = row.split(" ")[0]
+
     try:
         ann = set(meta2dict(line, level=typ).keys())
     except xml.etree.ElementTree.ParseError:

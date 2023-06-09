@@ -22,7 +22,7 @@ def topic_checker(token_list, topic_list):
         else:
             out.append("0")
 
-    return(out)
+    return out
 
 
 class Meta:
@@ -85,7 +85,7 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
     """"""
 
     # path_out
-    f_name, path_out = save_path_out(path_in, path_out, suffix=".meta.gz", force=force)
+    f_name, path_out = save_path_out(path_in, path_out, suffix=".tsv.gz", force=force)
 
     # init data containers
     meta = Meta()
@@ -128,6 +128,8 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
                         m[key] = extra_info[key]
 
             if line.startswith("</" + level):
+                if idx_key not in m.keys():
+                    m[idx_key] = 'c_' + str(pb.c)
                 meta.add_meta_dict(m, idx_key=idx_key)
                 pb.up()
 
@@ -150,12 +152,15 @@ def main(args):
 
     paths_in = glob(args.glob_in)
 
+    if len(paths_in) > 1 and args.path_out is not None:
+        raise ValueError('cannot read from several paths and write to only one')
+
     for p in paths_in:
 
         process_path(p,
                      args.path_out,
                      args.force,
-                     args.tag,
+                     args.level,
                      args.tokens,
                      args.extra,
-                     args.key)
+                     args.index)

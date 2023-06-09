@@ -99,6 +99,9 @@ def dict2meta(d, index_key='id', level='text'):
 
     """
 
+    if index_key not in d.keys():
+        index_key = None
+
     line = f'<{level}'
 
     # make sure index is the first one

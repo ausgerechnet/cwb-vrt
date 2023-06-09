@@ -1,4 +1,8 @@
-def repair_bio(vrt, col=7, sep="\t", s='ner'):
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+
+def repair_bio(vrt, col=7, sep="\t", level='ner'):
     """make sure that (potentially invalid) BIOES encoding complies to
     simple BIO schema
 
@@ -24,7 +28,7 @@ def repair_bio(vrt, col=7, sep="\t", s='ner'):
     the repaired column replaces the original column.
 
     additionally, BIO encoding will be transformed to s-attribute
-    <{s} type={tag}> (if there is already an s-att with the same name in
+    <{level} type={tag}> (if there is already an s-att with the same name in
     the input, the input will be ignored)
 
     note that we assume that any additional s-attributes stored in vrt
@@ -33,7 +37,7 @@ def repair_bio(vrt, col=7, sep="\t", s='ner'):
     :param iterable vrt: vrt-lines
     :param int col: column of each line that contains encoding
     :param str sep: separator for columns
-    :param str s: s-attribute to store BIO encoding
+    :param str level: s-attribute to store BIO encoding
 
     """
 
@@ -43,25 +47,25 @@ def repair_bio(vrt, col=7, sep="\t", s='ner'):
     for line in vrt:
         line = line.strip()     # just in case
 
-        # ignore s-attribute lines that are named like the new s-attribute
-        if line.startswith(f"<{s} ") or line.startswith(f"<{s}>") or line.startswith(f"</{s}"):
+        # ignore s-attribute lines that are named like the level
+        if line.startswith(f"<{level} ") or line.startswith(f"<{level}>") or line.startswith(f"</{level}"):
             continue
 
         # all other s-attributes (s, text) break BIO
         elif line.startswith("<"):
             if prev_state != "O":
-                lines.append(f"</{s}>")
+                lines.append(f"</{level}>")
             lines.append(line)
             prev_state, prev_tag = "O", None
 
         # p-attribute lines
         else:
-            line = line.split("\t")
+            line = line.split(sep)
             enc = line[col]
             if enc == "O":
                 state, tag = "O", None
                 if prev_state != "O":
-                    lines.append(f"</{s}>")
+                    lines.append(f"</{level}>")
             else:
                 state, tag = enc.split("-")
                 # transform to BIO
@@ -77,9 +81,9 @@ def repair_bio(vrt, col=7, sep="\t", s='ner'):
                 line[col] = "-".join([state, tag])
             if state == "B":
                 if prev_state != "O":
-                    lines.append(f"</{s}>")
-                lines.append(f'<{s} type="{tag}">')
-            lines.append("\t".join(line))
+                    lines.append(f"</{level}>")
+                lines.append(f'<{level} type="{tag}">')
+            lines.append(sep.join(line))
             prev_state, prev_tag = state, tag
 
     return lines

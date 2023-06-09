@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import argparse
 import logging
@@ -8,24 +9,36 @@ from vrt.indexing import main
 from vrt.version import __version__
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
-# logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="vrt-index: create CWB import script from vrt file")
-    parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__, help="Output version information and exit.")
+    parser = argparse.ArgumentParser(
+        description="vrt-index: create CWB import script from vrt file",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__,
+                        help="output version information and exit")
 
-    parser.add_argument("path_in", type=str, help="path to original .vrt.gz")
-    parser.add_argument("--path_out", "-o", default=None, type=str, help="where to save the result [derived from (each) path_in]")
-    parser.add_argument("--force", "-f", default=False, action='store_true', help="overwrite existing output file? [False]")
+    parser.add_argument("path_in", type=str,
+                        help="path to original .vrt.gz")
+    parser.add_argument("--path_out", "-o", default=None, type=str,
+                        help="where to save the result [derived from path_in]")
+    parser.add_argument("--force", "-f", default=False, action='store_true',
+                        help="overwrite existing output file?")
 
-    parser.add_argument("--name", "-n", default=None, help="corpus name [derived from path_in]")
-    parser.add_argument("--p_atts", "-p", default=['pos', 'lemma'], nargs="+", type=str, help="what p-attributes to index ['pos', 'lemma']")
-    parser.add_argument("--cut_off", "-c", default=1000000, type=int, help="how many lines to look at [1000000]")
-    parser.add_argument("--lemmatisation", "-l", default=False, action="store_true", help="apply cwb-lemmatize-smor and export? [False]")
-    parser.add_argument("--data_dir", "-d", default="/usr/local/share/cwb/data/", type=str)
-    parser.add_argument("--registry_dir", "-r", default="/usr/local/share/cwb/registry/", type=str)
+    parser.add_argument("--name", "-n", default=None, type=str,
+                        help="corpus name [derived from path_out]")
+    parser.add_argument("--p_atts", "-p", default=['pos', 'lemma'], nargs="+",
+                        type=str, help="what p-attributes to index")
+    parser.add_argument("--cut_off", "-c", default=1000000, type=int,
+                        help="how many lines to look at")
+    parser.add_argument("--data_dir", "-d", default="/usr/local/share/cwb/data/", type=str,
+                        help="CWB data directory to use (subdirectory will be created)")
+    parser.add_argument("--registry_dir", "-r", default="/usr/local/share/cwb/registry/", type=str,
+                        help="CWB registry directory to use")
+    parser.add_argument("--lemmatisation", "-l", default=False, action="store_true",
+                        help="apply cwb-lemmatize-smor and export?")
 
     if len(sys.argv) < 2:
         parser.print_help()

@@ -6,7 +6,7 @@ from glob import glob
 
 from pandas import NamedAgg, concat, read_csv
 
-from vrt.utils import Progress
+from vrt.utils import Progress, save_path_out
 from vrt.vrt import dict2meta
 
 
@@ -71,8 +71,9 @@ def write_cohorts(paths_in, path_out, corpus_name, meta, level='text'):
 def main(args):
     """"""
 
-    corpus_name = args.path_out.split("/")[-1].split(".vrt.gz")[0].upper() if args.name is None else args.name
     paths_in = glob(args.glob_in)
+    f_name, path_out = save_path_out(paths_in[0], args.path_out, suffix='-merged.vrt.gz', force=args.force)
+    corpus_name = path_out.split("/")[-1].split(".vrt.gz")[0].upper() if args.name is None else args.name
 
     if args.cohorts_info:
         # read cohorts info
@@ -87,4 +88,4 @@ def main(args):
     else:
         meta = None
 
-    write_cohorts(paths_in, args.path_out, corpus_name, meta)
+    write_cohorts(paths_in, path_out, corpus_name, meta)

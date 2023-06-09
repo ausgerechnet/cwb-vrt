@@ -79,21 +79,21 @@ def check_file(path, cut_off=-1):
     # meta data types
 
 
-def process_path(path_in, path_out, force, level, id_key, categorical):
+def process_path(path_in, path_out, force, level, id_attribute, categorical):
 
     f_name, path_out = save_path_out(path_in, path_out, suffix='-cqpweb.vrt.gz', force=force)
+
     ids = set()
     categorical_values = defaultdict(set)
     with gzip.open(path_in, "rt") as f, gzip.open(path_out, "wt") as f_out:
 
         text_count = 0
-
         pb = Progress(rate=1)
         for line in f:
 
             if line.startswith(f"<{level}") or line.startswith(f"<{level}>"):
                 meta = meta2dict(line, level=level)
-                id_encountered = force_categorical(meta.pop(id_key))
+                id_encountered = force_categorical(meta.pop(id_attribute, str(pb.c)))
                 id = save_id(id_encountered, ids)
                 meta['id'] = id
                 ids.add(id)
@@ -107,8 +107,11 @@ def process_path(path_in, path_out, force, level, id_key, categorical):
                 line = "</text>" + "\n"
                 text_count += 1
                 pb.up()
+            elif line.startswith("<text ") or line.startswith("<text>") or line.startswith("</text>"):
+                continue
 
             f_out.write(line)
+
         pb.fine()
 
     for key, values in categorical_values.items():
@@ -121,6 +124,6 @@ def main(args):
     process_path(args.path_in,
                  args.path_out,
                  args.force,
-                 args.tag,
-                 args.key,
+                 args.level,
+                 args.index,
                  args.categorical)

@@ -9,22 +9,32 @@ from vrt.merge import main
 from vrt.version import __version__
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
-# logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="vrt-merge: merge several VRT files of cohorts into one VRT")
-    parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__, help="Output version information and exit.")
+    parser = argparse.ArgumentParser(
+        description="vrt-merge: merge several VRT files of cohorts into one VRT",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument("-v", "--version", action="version", version="cwb-vrt %s" % __version__,
+                        help="output version information and exit")
 
-    parser.add_argument("glob_in", help="glob to paths to read from", type=str)
+    parser.add_argument("glob_in", type=str,
+                        help="glob to paths to read from")
+    parser.add_argument("--path_out", type=str,
+                        help="where to save the result [derived from (first) path_in]")
+    parser.add_argument("--force", "-f", default=False, action='store_true',
+                        help="overwrite existing output file?")
 
-    parser.add_argument("path_out", type=str, help="path to write to")
-    parser.add_argument("--cohorts_info", default=None, type=str, help="glob to cohorts-info")
-    parser.add_argument("--name", default=None, type=str, help="name of the corpus [derived from path_out]")
-    parser.add_argument("--order", default=['yw', 'duplicated', 'retweet_status'])
+    parser.add_argument("--cohorts_info", default=None, type=str,
+                        help="glob to cohorts-info")
+    parser.add_argument("--name", default=None, type=str,
+                        help="name of the corpus [derived from path_out]")
+    parser.add_argument("--order", default=[], nargs="+", type=str,
+                        help="")
 
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         parser.print_help()
         sys.exit(1)
 

@@ -30,11 +30,10 @@ setup(
         'vrt'
     ],
     scripts=[
-        'bin/vrt-cohorts',
+        'bin/vrt-cohort',
         'bin/vrt-cqpweb',
         'bin/vrt-deduplicate',
         'bin/vrt-index',
-        'bin/vrt-merge',
         'bin/vrt-meta',
     ],
     python_requires='>=3.6.2',
@@ -51,5 +50,6 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
 )
