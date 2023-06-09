@@ -1,6 +1,8 @@
 # cwb-vrt #
 **cwb-vrt** is a Python 3 module and command line interface for processing VRT files.
 
+## VRT files ##
+
 VRT files are XML files containing verticalised text and are used as an import (and export) format of the [IMS Open Corpus Workbench (CWB)](http://cwb.sourceforge.net/).  The CWB distinguishes **positional attributes** (p-atts) on a token-level, which are stored in tab-separated lines, and **structural attributes** (s-atts) stored in XML elements (i.e. matching pairs of start and end tags).
 ```
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes" ?>
@@ -34,6 +36,14 @@ There are also three s-atts (`story`, `p`, and `s`). The XML-element `story` has
 <story num="4" title="A Thrilling Experience">
 ```
 cwb-vrt usually refers to the name of the XML element (e.g. `story`) as "level" of the s-att. Note that in the CWB, each attribute-value pair will be stored as a separate s-att (here: `story_num` and `story_title`) with **annotation**.  `p` and `s` do not have any annotation.
+
+## VRT files for CQPweb ##
+
+Not all VRT files accepted by the CWB can be used for CQPweb:
+- only a relatively small number of `<text>`s are possible (up to ~ 1,000,000, preferably fewer)
+- there has to be an XML-element with unique IDs `<text id="...">`
+- meta data stored in `<text>`-attributes can be used for subcorpus creation and restricted queries, but they have to be marked as **categorical** in CQPweb — and this only works if all values are valid MySQL-identifiers
+
 
 ## Installation ##
 
