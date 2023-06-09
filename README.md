@@ -31,19 +31,18 @@ tick	VB	tick
 ```
 The VRT file above contains three p-atts: by default, the first or *primary* layer is called `word` — the other p-atts here would be `pos` and `lemma`. Note that the names of p-atts are usually not explicitly encoded in VRT files.
 
-There are also three s-atts (`story`, `p`, and `s`). The XML-element `story` has two attribute-value pairs:
+There are also three s-atts encoded in XML-elements: `story`, `p`, and `s`. `story` has two attribute-value pairs:
 ```
 <story num="4" title="A Thrilling Experience">
 ```
-cwb-vrt usually refers to the name of the XML element (e.g. `story`) as "level" of the s-att. Note that in the CWB, each attribute-value pair will be stored as a separate s-att (here: `story_num` and `story_title`) with **annotation**.  `p` and `s` do not have any annotation.
+Note that in the CWB, each attribute is stored separately (here: `story_num` and `story_title`) with **annotation** (`story` itself is not encoded as an s-att).  `p` and `s` do not have any annotation. cwb-vrt refers to the name of the XML element (e.g. `story`) usually as "level" of the s-att and stores it alongside the other key-value pairs in a dictionary.
 
-## VRT files for CQPweb ##
+### VRT files for CQPweb ###
 
 Not all VRT files accepted by the CWB can be used for CQPweb:
-- only a relatively small number of `<text>`s are possible (up to ~ 1,000,000, preferably fewer)
-- there has to be an XML-element with unique IDs `<text id="...">`
+- there has to be an XML-element called "text" with unique IDs `<text id="...">`
+- only a relatively small number of `<text>`s are possible (~ 10,000,000)
 - meta data stored in `<text>`-attributes can be used for subcorpus creation and restricted queries, but they have to be marked as **categorical** in CQPweb — and this only works if all values are valid MySQL-identifiers
-
 
 ## Installation ##
 
