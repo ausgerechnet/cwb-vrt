@@ -81,10 +81,11 @@ def cohort_via_files(paths_in, path_out, level_old, level_new, level_cohort, cat
         with gzip.open(path_out, "wt") as f_out:
             f_out.write("<corpus>\n")
             for p, cohort_id in zip(paths, cohorts_id):
+                f_out.write(dict2meta(cohorts_meta[cohort_id], level=level_cohort))
                 with gzip.open(p, "rt") as f:
-                    f_out.write(dict2meta(cohorts_meta[cohort_id], level=level_cohort))
-                    f_out.write(f.read())
-                    f_out.write(f"</{level_cohort}>\n")
+                    for line in f:
+                        f_out.write(line)
+                f_out.write(f"</{level_cohort}>\n")
                 pb.up()
             f_out.write("</corpus>")
 
