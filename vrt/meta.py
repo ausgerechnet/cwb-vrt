@@ -95,16 +95,16 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
         nr_tokens = list()
 
     # iterate over file
-    f_in = gzip.open(path_in, "rt") if is_gz_file(path_in) else open(path_in, "rt")
     print("collecting meta data")
+    f_in = gzip.open(path_in, "rt") if is_gz_file(path_in) else open(path_in, "rt")
     pb = Progress()
     for line in f_in:
 
         # count tokens
         if tokens:
-            if line.startswith("<" + level):
+            if line.startswith(f"<{level}>") or line.startswith(f"<{level} "):
                 nr = 0
-            elif line.startswith("</" + level):
+            elif line.startswith(f"</{level}>"):
                 nr_tokens.append(nr)
             elif not line.startswith("<"):
                 nr += 1
@@ -113,12 +113,12 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
         if line.startswith("<"):
 
             for e in extra:
-                if line.startswith("<" + e):
+                if line.startswith(f"<{e}>") or line.startswith(f"<{e} "):
                     ex = meta2dict(line, level=e)
                     for key in ex:
                         extra_info["_".join([e, key])] = ex[key]
 
-            if line.startswith("<" + level):
+            if line.startswith(f"<{level}>") or line.startswith(f"<{level} "):
                 try:
                     m = meta2dict(line, level)
                 except ParseError:
@@ -127,7 +127,7 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
                     for key in extra_info:
                         m[key] = extra_info[key]
 
-            if line.startswith("</" + level):
+            if line.startswith(f"</{level}>"):
                 if idx_key not in m.keys():
                     m[idx_key] = 'c_' + str(pb.c)
                 meta.add_meta_dict(m, idx_key=idx_key)
