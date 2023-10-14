@@ -35,6 +35,7 @@ setup(
         'bin/vrt-deduplicate',
         'bin/vrt-index',
         'bin/vrt-meta',
+        'bin/vrt-merge'
     ],
     python_requires='>=3.6.2',
     install_requires=[
