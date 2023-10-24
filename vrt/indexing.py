@@ -65,7 +65,7 @@ def create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, le
     return "\n".join(lines)
 
 
-def guess_attributes(path_in, cut_off):
+def guess_attributes(path_in, cut_off, ignore_corpus=False):
     """"""
 
     print(f"guessing attributes from first {cut_off} lines...")
@@ -107,7 +107,7 @@ def guess_attributes(path_in, cut_off):
     s_atts_new = list()
     for s in s_atts.keys():
 
-        if s == 'corpus':       # ignore <corpus>
+        if ignore_corpus and s == 'corpus':       # ignore <corpus>
             continue
 
         if len(s_atts[s]) == 0:  # no annotation
@@ -158,10 +158,11 @@ def process_path(path_in, path_out, force, name, p_atts, cut_off, data_dir, regi
         padding = atts['nr_p_atts'] - (len(p_atts) + 1)
         p_atts = p_atts + [f"p_att_{c}" for c in range(padding)]
 
-    # convert to strings
+    # convert attributes to strings
     p_atts = "-P " + " -P ".join(p_atts[: atts['nr_p_atts'] - 1]) if atts['nr_p_atts'] > 1 else ""
-    print(f"p-attribute names: {p_atts}")
+    print(f"p-attributes: {p_atts}")
     s_atts = "-S " + " -S ".join(atts['s_atts'])
+    print(f"s-attributes: {s_atts}")
 
     # create file contents
     file_contents = create_file(path_in, corpus_name, registry_dir, data_dir, p_atts, s_atts, lemmatisation)
