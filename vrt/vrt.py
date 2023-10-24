@@ -82,7 +82,7 @@ def meta2dict(line, level='text'):
     """converts .vrt meta data line into dictionary
 
     """
-
+    # TODO allow not passing level
     line = re.sub("&", "&amp;", line)  # allow ampersands in input
     tree = ET.fromstring(line + "</" + level + ">")  # close tag
 
