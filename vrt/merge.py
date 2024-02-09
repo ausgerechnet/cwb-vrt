@@ -52,18 +52,24 @@ def write_cohorts(paths_in, path_out, corpus_name, meta, level='text'):
 
         f_out.write(f'<corpus name="{corpus_name}">\n')
 
-        pb = Progress(length=len(meta), rate=1)
-        for row in meta.iterrows():
-            m = dict(row[1])
-            path = m.pop('path')
+        if meta:
+            pb = Progress(length=len(meta), rate=1)
+            for row in meta.iterrows():
+                m = dict(row[1])
+                path = m.pop('path')
+                f_out.write(dict2meta(m, level=level))
+                with gzip.open(path, "rt") as f:
+                    for line in f:
+                        f_out.write(line)
+                f_out.write(f"</{level}>\n")
 
-            f_out.write(dict2meta(m, level=level))
-            with gzip.open(path, "rt") as f:
-                for line in f:
-                    f_out.write(line)
-            f_out.write(f"</{level}>\n")
-
-            pb.up()
+        else:
+            pb = Progress(length=len(paths_in), rate=1)
+            for path in sorted(paths_in):
+                with gzip.open(path, "rt") as f:
+                    for line in f:
+                        f_out.write(line)
+                pb.up()
 
         f_out.write("</corpus>\n")
 
