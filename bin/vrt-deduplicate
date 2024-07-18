@@ -31,6 +31,8 @@ if __name__ == '__main__':
                         help="level of regions to check for duplicates")
     parser.add_argument("--keep", type=str, default="last",
                         help="which one of these regions to keep")
+    parser.add_argument("--normalise", "-n", action='store_false',
+                        help="normalise tokens? (remove URLs, mentions, etc.)")
 
     if len(sys.argv) < 2:
         parser.print_help()
