@@ -35,6 +35,8 @@ if __name__ == "__main__":
                         help="additional levels with extra info (above primary level)")
     parser.add_argument("--tokens", "-c", default=False, action='store_true',
                         help="count tokens?")
+    parser.add_argument("--s_atts", "-s", default=[], type=str, nargs='+',
+                        help="additional s-attribute regions to count (below primary level)")
     # TODO: implement functionality
     # parser.add_argument("--terms", "-s", help="path to terms to count (one per line)", type=str)
     # parser.add_argument("--term_column", default=1, help="which column to use for counting [1]")

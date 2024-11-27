@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from collections import defaultdict
 import gzip
 from glob import glob
-from xml.etree.ElementTree import ParseError
 
+from xml.etree.ElementTree import ParseError
 from pandas import DataFrame
 
 from vrt.utils import Progress, is_gz_file, save_path_out
@@ -81,7 +82,7 @@ class Meta:
         self.df.to_csv(p_out, sep=sep, compression=compression)
 
 
-def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
+def process_path(path_in, path_out, force, level, tokens, extra, idx_key, s_atts=[]):
     """"""
 
     # path_out
@@ -90,6 +91,9 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
     # init data containers
     meta = Meta()
     extra_info = dict()
+    if len(s_atts) > 0:
+        nr_s = {s: 0 for s in s_atts}
+        nr_s_regions = defaultdict(list)
     if tokens:
         nr = 0
         nr_tokens = list()
@@ -98,6 +102,7 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
     print("collecting meta data")
     f_in = gzip.open(path_in, "rt") if is_gz_file(path_in) else open(path_in, "rt")
     pb = Progress()
+    cpos = 0
     for line in f_in:
 
         # count tokens
@@ -108,6 +113,16 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
                 nr_tokens.append(nr)
             elif not line.startswith("<"):
                 nr += 1
+                cpos += 1
+
+        # count s-att
+        for s in s_atts:
+            if line.startswith(f"<{level}>") or line.startswith(f"<{level} "):
+                nr_s[s] = 0
+            elif line.startswith(f"</{level}>"):
+                nr_s_regions[s].append(nr_s[s])
+            elif line.startswith(f"</{s}>"):
+                nr_s[s] += 1
 
         # meta data
         if line.startswith("<"):
@@ -140,6 +155,10 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key):
     if tokens:
         meta.variables['nr_tokens'] = nr_tokens
 
+    for s in s_atts:
+        print(nr_s_regions[s])
+        meta.variables[f'nr_{s}'] = nr_s_regions[s]
+
     # save
     print("saving file")
     meta.to_csv(path_out)
@@ -156,11 +175,11 @@ def main(args):
         raise ValueError('cannot read from several paths and write to only one')
 
     for p in paths_in:
-
         process_path(p,
                      args.path_out,
                      args.force,
                      args.level,
                      args.tokens,
                      args.extra,
-                     args.index)
+                     args.index,
+                     args.s_atts)
