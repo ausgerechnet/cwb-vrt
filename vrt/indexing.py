@@ -79,8 +79,8 @@ def guess_attributes(path_in, cut_off, ignore_corpus=False):
     pb = Progress(length=cut_off) if cut_off > 0 else Progress()
     for line in f:
 
-        if line.startswith("<?"):
-            # xml declaration
+        if line.startswith("<?") or line.startswith("<!"):
+            # xml declaration or comment
             continue
 
         elif line.startswith("<") and not line.startswith("</"):
