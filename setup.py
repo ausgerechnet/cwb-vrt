@@ -37,10 +37,10 @@ setup(
         'bin/vrt-meta',
         'bin/vrt-merge'
     ],
-    python_requires='>=3.6.2',
+    python_requires='>=3.7.0',
     install_requires=[
-        "pandas>=1.1.5",
-        "tqdm>=4.64.0",
+        "pandas>=2.0",
+        "tqdm>=4.67.1",
     ],
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
