@@ -6,7 +6,7 @@ import gzip
 from glob import glob
 
 from xml.etree.ElementTree import ParseError
-from pandas import DataFrame
+from pandas import concat, DataFrame
 
 from vrt.utils import Progress, is_gz_file, save_path_out
 from vrt.vrt import meta2dict, remove_whitespace
@@ -74,6 +74,7 @@ class Meta:
         for k in self.variables.keys():
             df[k] = self.variables[k]
         self.df = df
+        return df
 
     def to_csv(self, p_out, compression="gzip", sep="\t"):
         """"""
@@ -84,9 +85,6 @@ class Meta:
 
 def process_path(path_in, path_out, force, level, tokens, extra, idx_key, s_atts=[]):
     """"""
-
-    # path_out
-    f_name, path_out = save_path_out(path_in, path_out, suffix=".tsv.gz", force=force)
 
     # init data containers
     meta = Meta()
@@ -104,7 +102,6 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key, s_atts
     pb = Progress()
     cpos = 0
     for line in f_in:
-
         # count tokens
         if tokens:
             if line.startswith(f"<{level}>") or line.startswith(f"<{level} "):
@@ -126,7 +123,6 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key, s_atts
 
         # meta data
         if line.startswith("<"):
-
             for e in extra:
                 if line.startswith(f"<{e}>") or line.startswith(f"<{e} "):
                     ex = meta2dict(line, level=e)
@@ -156,14 +152,15 @@ def process_path(path_in, path_out, force, level, tokens, extra, idx_key, s_atts
         meta.variables['nr_tokens'] = nr_tokens
 
     for s in s_atts:
-        print(nr_s_regions[s])
         meta.variables[f'nr_{s}'] = nr_s_regions[s]
 
     # save
-    print("saving file")
-    meta.to_csv(path_out)
-
-    print(f"done. output written to {path_out}")
+    if path_out is not None:
+        print("saving file")
+        meta.to_csv(path_out)
+        print(f"done. output written to {path_out}")
+    else:
+        return meta
 
 
 def main(args):
@@ -171,15 +168,30 @@ def main(args):
 
     paths_in = glob(args.glob_in)
 
-    if len(paths_in) > 1 and args.path_out is not None:
-        raise ValueError('cannot read from several paths and write to only one')
+    if args.path_out is not None:
+        f_name, path_out = save_path_out(paths_in[0], args.path_out, suffix=".tsv.gz", force=args.force)
 
+    ms = list()
     for p in paths_in:
-        process_path(p,
-                     args.path_out,
-                     args.force,
-                     args.level,
-                     args.tokens,
-                     args.extra,
-                     args.index,
-                     args.s_atts)
+
+        if path_out:
+            p_out = None
+        else:
+            f_name, p_out = save_path_out(p, None, suffix=".tsv.gz", force=args.force)
+
+        m = process_path(p,
+                         p_out,
+                         args.force,
+                         args.level,
+                         args.tokens,
+                         args.extra,
+                         args.index,
+                         args.s_atts)
+
+        df = m.get_df()
+        if df is not None:
+            ms.append(df)
+
+    if len(ms) > 0 and path_out:
+        m = concat(ms)
+        m.to_csv(path_out, sep="\t", compression="gzip")
