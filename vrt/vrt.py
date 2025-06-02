@@ -137,7 +137,12 @@ def iter_s(f_in, level='text', yield_meta=True):
     for line in f_in:
         line = line.strip()
         if line.startswith(f"<{level}>") or line.startswith(f"<{level} "):
-            meta = meta2dict(line, level)
+            try:
+                meta = meta2dict(line, level)
+            except ET.ParseError:
+                print("XML parse error in line, skipping:")
+                print(line)
+                continue
             text = list()
             write = True
         elif line.startswith(f"</{level}>"):
