@@ -1,6 +1,12 @@
 # cwb-vrt #
 **cwb-vrt** is a Python 3 module and command line interface for processing VRT files.
 
+## Installation ##
+
+```
+pip install git+https://github.com/ausgerechnet/cwb-vrt.git
+```
+
 ## VRT files ##
 
 VRT files are XML files containing verticalised text and are used as an import (and export) format of the [IMS Open Corpus Workbench (CWB)](http://cwb.sourceforge.net/).  The CWB distinguishes **positional attributes** (p-atts) on a token-level, which are stored in tab-separated lines, and **structural attributes** (s-atts) stored in XML elements (i.e. matching pairs of start and end tags).
@@ -43,12 +49,6 @@ Not all VRT files accepted by the CWB can be used for CQPweb:
 - there has to be an XML-element called "text" with unique IDs `<text id="...">`
 - only a relatively small number of `<text>`s are possible (~ 10,000,000)
 - meta data stored in `<text>`-attributes can be used for subcorpus creation and restricted queries, but they have to be marked as **categorical** in CQPweb — and this only works if all values are valid MySQL-identifiers
-
-## Installation ##
-
-```
-pip install git+ssh:git@github.com/ausgerechnet/cwb-vrt.git
-```
 
 ## Using the CLI
 
